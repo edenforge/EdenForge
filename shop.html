@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>EdenForge Shop</title>
   <link rel="stylesheet" href="styles.css"> <!-- Your main CSS file -->
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -13,20 +14,17 @@
     <p>Plants, Wooden Labels & Outdoor Essentials</p>
   </header>
 
-  
   <nav>
     <a href="index.html">About</a>
     <a href="services.html">Services</a>
     <a href="portfolio.html">Portfolio</a>
     <a href="contact.html">Contact</a>
-	<a href="shop.html">Shop</a>
+    <a href="shop.html">Shop</a>
   </nav>
- 
 
   <section>
     <div class="services">
-   
-
+    
       <div class="card">
         <img src="https://via.placeholder.com/300x180?text=Herb+Garden+Kit" alt="Herb Garden Kit" style="width:100%; border-radius: 8px;">
         <h3>Herb Garden Starter Kit</h3>
@@ -40,7 +38,7 @@
         <h3>Wooden Plant Labels (20-Pack)</h3>
         <p><strong>£8.00</strong></p>
         <p>Eco-friendly labels for your garden beds.</p>
-        <button>Add to Cart</button>
+        <button id="buy-wooden-labels">Buy Now</button>
       </div>
 
       <div class="card">
@@ -55,8 +53,22 @@
 
   <footer>
     <p>&copy; 2025 EdenForge. All rights reserved.</p>
-   
   </footer>
+
+  <script>
+    const stripe = Stripe("pk_test_YOUR_PUBLIC_KEY"); // Replace with your Stripe public key
+
+    document.getElementById("buy-wooden-labels").addEventListener("click", () => {
+      fetch("/server/create-checkout-session.php", {
+        method: "POST"
+      })
+      .then(res => res.json())
+      .then(data => {
+        return stripe.redirectToCheckout({ sessionId: data.id });
+      })
+      .catch(err => console.error(err));
+    });
+  </script>
 
 </body>
 </html>
