@@ -1,75 +1,197 @@
-<script>
-  const cart = [];
-
-  const cartButton = document.getElementById("cart-button");
-  const cartPanel = document.getElementById("cart");
-  const cartCount = document.getElementById("cart-count");
-  const cartItems = document.getElementById("cart-items");
-  const cartTotal = document.getElementById("cart-total");
-
-  cartButton.addEventListener("click", () => {
-    cartPanel.classList.toggle("open");
-  });
-
-  function addToCart(name, price) {
-    const item = cart.find(i => i.name === name);
-    if (item) {
-      item.quantity += 1;
-    } else {
-      cart.push({ name, price, quantity: 1 });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EdenForge Shop</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    #cart {
+      position: fixed;
+      top: 0;
+      right: 0;
+      background: #fff;
+      border-left: 1px solid #ccc;
+      width: 300px;
+      height: 100%;
+      padding: 20px;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
     }
-    updateCartUI();
-  }
-
-  function changeQuantity(name, amount) {
-    const item = cart.find(i => i.name === name);
-    if (!item) return;
-
-    item.quantity += amount;
-    if (item.quantity <= 0) {
-      removeItem(name);
-    } else {
-      updateCartUI();
+    #cart.open {
+      transform: translateX(0);
     }
-  }
-
-  function removeItem(name) {
-    const index = cart.findIndex(i => i.name === name);
-    if (index !== -1) {
-      cart.splice(index, 1);
-      updateCartUI();
+    #cart h2 {
+      margin-top: 0;
     }
-  }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 5px;
+    }
+    .cart-controls button {
+      margin: 0 5px;
+      padding: 2px 8px;
+    }
+    #cart-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 5px;
+      z-index: 1001;
+    }
+  </style>
+</head>
+<body>
 
-  function updateCartUI() {
-    cartItems.innerHTML = "";
-    let total = 0;
-    let count = 0;
+  <header>
+    <h1>EdenForge Shop</h1>
+    <p>Plants, Wooden Labels & Outdoor Essentials</p>
+  </header>
 
-    cart.forEach(item => {
-      total += item.price * item.quantity;
-      count += item.quantity;
+  <nav>
+    <a href="index.html">About</a>
+    <a href="services.html">Services</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="contact.html">Contact</a>
+    <a href="shop.html">Shop</a>
+  </nav>
 
-      const el = document.createElement("div");
-      el.className = "cart-item";
-      el.innerHTML = `
-        <div style="flex: 1;">
-          ${item.name}<br>
-          <button onclick="changeQuantity('${item.name}', -1)">−</button>
-          ${item.quantity}
-          <button onclick="changeQuantity('${item.name}', 1)">+</button>
-        </div>
-        <div>£${(item.price * item.quantity).toFixed(2)}</div>
-      `;
-      cartItems.appendChild(el);
+  <div id="cart-button">🛒 Cart (<span id="cart-count">0</span>)</div>
+
+  <div id="cart">
+    <h2>Your Cart</h2>
+    <div id="cart-items"></div>
+    <p><strong>Total: £<span id="cart-total">0.00</span></strong></p>
+    <button onclick="checkout()">Proceed to Checkout</button>
+  </div>
+
+  <section>
+    <div class="services">
+    
+      <div class="card">
+        <img src="https://via.placeholder.com/300x180?text=Herb+Garden+Kit" alt="Herb Garden Kit" style="width:100%; border-radius: 8px;">
+        <h3>Herb Garden Starter Kit</h3>
+        <p><strong>£25.00</strong></p>
+        <p>Includes seeds, pots, and instructions.</p>
+        <button onclick="addToCart('Herb Garden Starter Kit', 25.00)">Add to Cart</button>
+      </div>
+
+      <div class="card">
+        <img src="https://via.placeholder.com/300x180?text=Wooden+Plant+Labels" alt="Wooden Plant Labels" style="width:100%; border-radius: 8px;">
+        <h3>Wooden Plant Labels (20-Pack)</h3>
+        <p><strong>£8.00</strong></p>
+        <p>Eco-friendly labels for your garden beds.</p>
+        <button onclick="addToCart('Wooden Plant Labels (20-Pack)', 8.00)">Add to Cart</button>
+      </div>
+
+      <div class="card">
+        <img src="https://via.placeholder.com/300x180?text=Planter+Box" alt="Outdoor Planter Box" style="width:100%; border-radius: 8px;">
+        <h3>Outdoor Planter Box</h3>
+        <p><strong>£80.00</strong></p>
+        <p>Hand-crafted from weather-resistant wood.</p>
+        <button onclick="addToCart('Outdoor Planter Box', 80.00)">Add to Cart</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 EdenForge. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const cartButton = document.getElementById("cart-button");
+    const cartPanel = document.getElementById("cart");
+    const cartCount = document.getElementById("cart-count");
+    const cartItems = document.getElementById("cart-items");
+    const cartTotal = document.getElementById("cart-total");
+
+    let cart = JSON.parse(localStorage.getItem("edenforge_cart")) || [];
+
+    cartButton.addEventListener("click", () => {
+      cartPanel.classList.toggle("open");
     });
 
-    cartTotal.textContent = total.toFixed(2);
-    cartCount.textContent = count;
-  }
+    function saveCart() {
+      localStorage.setItem("edenforge_cart", JSON.stringify(cart));
+    }
 
-  function checkout() {
-    alert("Checkout process would go here.");
-    // Integration with Stripe Checkout would go here
-  }
-</script>
+    function addToCart(name, price) {
+      const item = cart.find(i => i.name === name);
+      if (item) {
+        item.quantity += 1;
+      } else {
+        cart.push({ name, price, quantity: 1 });
+      }
+      saveCart();
+      updateCartUI();
+    }
+
+    function changeQuantity(name, amount) {
+      const item = cart.find(i => i.name === name);
+      if (!item) return;
+
+      item.quantity += amount;
+      if (item.quantity <= 0) {
+        removeItem(name);
+      }
+      saveCart();
+      updateCartUI();
+    }
+
+    function removeItem(name) {
+      cart = cart.filter(i => i.name !== name);
+      saveCart();
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      cartItems.innerHTML = "";
+      let total = 0;
+      let count = 0;
+
+      cart.forEach(item => {
+        total += item.price * item.quantity;
+        count += item.quantity;
+
+        const el = document.createElement("div");
+        el.className = "cart-item";
+        el.innerHTML = `
+          <div style="flex: 1;">
+            ${item.name}<br>
+            <div class="cart-controls">
+              <button onclick="changeQuantity('${item.name}', -1)">−</button>
+              ${item.quantity}
+              <button onclick="changeQuantity('${item.name}', 1)">+</button>
+              <button onclick="removeItem('${item.name}')" style="margin-left:10px;">❌</button>
+            </div>
+          </div>
+          <div>£${(item.price * item.quantity).toFixed(2)}</div>
+        `;
+        cartItems.appendChild(el);
+      });
+
+      cartTotal.textContent = total.toFixed(2);
+      cartCount.textContent = count;
+    }
+
+    function checkout() {
+      alert("Checkout process would go here.");
+      // In production: send cart to server and create a Stripe Checkout session
+    }
+
+    // Initialize cart display
+    updateCartUI();
+  </script>
+
+</body>
+</html>
