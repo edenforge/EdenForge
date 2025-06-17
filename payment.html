@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Payment - EdenForge</title>
+  <title>Card Payment - EdenForge</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=GBP"></script> <!-- Replace YOUR_CLIENT_ID -->
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -14,8 +13,8 @@
       padding: 0 20px;
     }
     h1 {
-      margin-bottom: 20px;
       text-align: center;
+      margin-bottom: 20px;
     }
     .section {
       margin-bottom: 30px;
@@ -35,8 +34,8 @@
       margin-bottom: 15px;
       border-radius: 4px;
       border: 1px solid #ccc;
-      box-sizing: border-box;
       font-size: 14px;
+      box-sizing: border-box;
     }
     #cart-summary div {
       display: flex;
@@ -49,23 +48,15 @@
       font-weight: 700;
       font-size: 16px;
     }
-    #paypal-button-container {
-      margin-top: 20px;
-      text-align: center;
-    }
-    .error {
-      color: red;
-      font-size: 13px;
-      margin-top: -12px;
-      margin-bottom: 12px;
-    }
-    #submit-message {
-      margin-top: 15px;
-      font-weight: 600;
-      text-align: center;
+    #card-element {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      margin-bottom: 15px;
     }
     #submit-btn {
-      background: #0070ba;
+      background: #5469d4;
       color: white;
       border: none;
       padding: 12px 25px;
@@ -79,87 +70,77 @@
       background: grey;
       cursor: not-allowed;
     }
+    #payment-message {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: 600;
+    }
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-top: -12px;
+      margin-bottom: 12px;
+    }
   </style>
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
-  <h1>EdenForge Payment</h1>
+  <h1>Complete Your Payment</h1>
 
   <div class="section" id="cart-section">
     <h2>Your Order</h2>
     <div id="cart-summary"></div>
-    <p style="text-align: right; font-weight: 700; font-size: 18px;">Total: £<span id="checkout-total">0.00</span></p>
+    <p style="text-align: right; font-weight: 700; font-size: 18px;">
+      Total: £<span id="checkout-total">0.00</span>
+    </p>
   </div>
 
   <form id="payment-form" novalidate>
-    <div class="section" id="shipping-section">
-      <h2>Shipping Details</h2>
-
-      <label for="shipFullName">Full Name *</label>
-      <input type="text" id="shipFullName" name="shipFullName" required />
-      <div class="error" id="error-shipFullName"></div>
-
-      <label for="shipEmail">Email Address *</label>
-      <input type="email" id="shipEmail" name="shipEmail" required />
-      <div class="error" id="error-shipEmail"></div>
-
-      <label for="shipAddress">Address *</label>
-      <textarea id="shipAddress" name="shipAddress" rows="3" required></textarea>
-      <div class="error" id="error-shipAddress"></div>
-
-      <label for="shipCity">City *</label>
-      <input type="text" id="shipCity" name="shipCity" required />
-      <div class="error" id="error-shipCity"></div>
-
-      <label for="shipPostcode">Postcode *</label>
-      <input type="text" id="shipPostcode" name="shipPostcode" required />
-      <div class="error" id="error-shipPostcode"></div>
-    </div>
-
     <div class="section" id="billing-section">
       <h2>Billing Details</h2>
 
-      <label for="billFullName">Full Name *</label>
-      <input type="text" id="billFullName" name="billFullName" required />
-      <div class="error" id="error-billFullName"></div>
+      <label for="fullName">Full Name *</label>
+      <input type="text" id="fullName" name="fullName" required />
+      <div class="error" id="error-fullName"></div>
 
-      <label for="billEmail">Email Address *</label>
-      <input type="email" id="billEmail" name="billEmail" required />
-      <div class="error" id="error-billEmail"></div>
+      <label for="email">Email Address *</label>
+      <input type="email" id="email" name="email" required />
+      <div class="error" id="error-email"></div>
 
-      <label for="billAddress">Address *</label>
-      <textarea id="billAddress" name="billAddress" rows="3" required></textarea>
-      <div class="error" id="error-billAddress"></div>
+      <label for="address">Address *</label>
+      <textarea id="address" name="address" rows="3" required></textarea>
+      <div class="error" id="error-address"></div>
 
-      <label for="billCity">City *</label>
-      <input type="text" id="billCity" name="billCity" required />
-      <div class="error" id="error-billCity"></div>
+      <label for="city">City *</label>
+      <input type="text" id="city" name="city" required />
+      <div class="error" id="error-city"></div>
 
-      <label for="billPostcode">Postcode *</label>
-      <input type="text" id="billPostcode" name="billPostcode" required />
-      <div class="error" id="error-billPostcode"></div>
+      <label for="postcode">Postcode *</label>
+      <input type="text" id="postcode" name="postcode" required />
+      <div class="error" id="error-postcode"></div>
     </div>
 
-    <button type="button" id="submit-btn">Submit Details & Enable Payment</button>
+    <div class="section">
+      <h2>Card Details</h2>
+      <div id="card-element"><!--Stripe.js injects the Card Element--></div>
+      <div id="card-errors" role="alert" class="error"></div>
+    </div>
+
+    <button type="submit" id="submit-btn">Pay Now</button>
   </form>
 
-  <div id="paypal-button-container" style="display:none;"></div>
-
-  <div id="submit-message"></div>
+  <div id="payment-message"></div>
 
   <script>
     const cart = JSON.parse(localStorage.getItem("edenforge_cart")) || [];
     const cartSummary = document.getElementById("cart-summary");
     const totalElement = document.getElementById("checkout-total");
-    const submitMessage = document.getElementById("submit-message");
-    const paypalContainer = document.getElementById("paypal-button-container");
-    const form = document.getElementById("payment-form");
+    const paymentMessage = document.getElementById("payment-message");
     const submitBtn = document.getElementById("submit-btn");
 
     let total = 0;
-    let paypalButtonsRendered = false;
 
-    // Show cart items & total
     if (cart.length === 0) {
       cartSummary.innerHTML = "<p>Your cart is empty.</p>";
       totalElement.textContent = "0.00";
@@ -174,94 +155,127 @@
       totalElement.textContent = total.toFixed(2);
     }
 
-    // Validate form fields
-    function validateFields(fields) {
-      let valid = true;
-      fields.forEach(field => {
-        const input = document.getElementById(field);
-        const errorDiv = document.getElementById("error-" + field);
-        if (!input.value.trim()) {
-          errorDiv.textContent = "This field is required.";
-          valid = false;
-        } else {
-          errorDiv.textContent = "";
-          if (field.toLowerCase().includes("email")) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!re.test(input.value.trim())) {
-              errorDiv.textContent = "Please enter a valid email.";
-              valid = false;
-            }
+    // Stripe setup
+    const stripe = Stripe("pk_live_51Rb4PjA8LgWdQnOiZgkahrtMVKJsIr8RNBt7hThQa2mIkEY8QVdRNXlWQ1KNZfnr4XUQeOnTGlGdvhNFZjiQyzhI0033sv7o2D"); // Your Stripe publishable key
+    const elements = stripe.elements();
+    const cardElement = elements.create("card");
+    cardElement.mount("#card-element");
+
+    // Display card errors
+    cardElement.on("change", event => {
+      const displayError = document.getElementById("card-errors");
+      if (event.error) {
+        displayError.textContent = event.error.message;
+      } else {
+        displayError.textContent = "";
+      }
+    });
+
+    function validateField(id) {
+      const input = document.getElementById(id);
+      const errorDiv = document.getElementById("error-" + id);
+      if (!input.value.trim()) {
+        errorDiv.textContent = "This field is required.";
+        return false;
+      } else {
+        errorDiv.textContent = "";
+        if (id === "email") {
+          const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!re.test(input.value.trim())) {
+            errorDiv.textContent = "Please enter a valid email.";
+            return false;
           }
         }
-      });
-      return valid;
+        return true;
+      }
     }
 
-    function validateAll() {
-      const shippingFields = ["shipFullName", "shipEmail", "shipAddress", "shipCity", "shipPostcode"];
-      const billingFields = ["billFullName", "billEmail", "billAddress", "billCity", "billPostcode"];
-      return validateFields(shippingFields) && validateFields(billingFields);
+    function validateForm() {
+      const fields = ["fullName", "email", "address", "city", "postcode"];
+      return fields.every(validateField);
     }
 
-    function renderPayPalButton() {
-      if (paypalButtonsRendered) return; // Prevent re-rendering
-      paypalButtonsRendered = true;
-      paypalContainer.style.display = "block";
+    const form = document.getElementById("payment-form");
 
-      paypal.Buttons({
-        createOrder: function(data, actions) {
-          // Use billing address for PayPal shipping here (adjust if needed)
-          return actions.order.create({
-            purchase_units: [{
-              amount: { value: total.toFixed(2) },
-              shipping: {
-                name: { full_name: document.getElementById("shipFullName").value.trim() },
-                address: {
-                  address_line_1: document.getElementById("shipAddress").value.trim(),
-                  admin_area_2: document.getElementById("shipCity").value.trim(),
-                  postal_code: document.getElementById("shipPostcode").value.trim(),
-                  country_code: "GB"
-                }
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      paymentMessage.textContent = "";
+      if (!validateForm()) {
+        paymentMessage.style.color = "red";
+        paymentMessage.textContent = "Please correct the errors in the form.";
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Processing...";
+
+      // Create PaymentIntent on your server
+      try {
+        const response = await fetch("/create-payment-intent", { // Your backend endpoint
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            cart: cart,
+            billingDetails: {
+              name: document.getElementById("fullName").value.trim(),
+              email: document.getElementById("email").value.trim(),
+              address: {
+                line1: document.getElementById("address").value.trim(),
+                city: document.getElementById("city").value.trim(),
+                postal_code: document.getElementById("postcode").value.trim(),
+                country: "GB"
               }
-            }]
-          });
-        },
-        onApprove: function(data, actions) {
-          return actions.order.capture().then(function(details) {
-            submitMessage.style.color = "green";
-            submitMessage.textContent = `Thank you, ${details.payer.name.given_name}! Your payment was successful.`;
+            }
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.clientSecret) {
+          throw new Error("Failed to get client secret.");
+        }
+
+        // Confirm the card payment
+        const result = await stripe.confirmCardPayment(data.clientSecret, {
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              name: document.getElementById("fullName").value.trim(),
+              email: document.getElementById("email").value.trim(),
+              address: {
+                line1: document.getElementById("address").value.trim(),
+                city: document.getElementById("city").value.trim(),
+                postal_code: document.getElementById("postcode").value.trim(),
+                country: "GB"
+              }
+            }
+          }
+        });
+
+        if (result.error) {
+          paymentMessage.style.color = "red";
+          paymentMessage.textContent = result.error.message;
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Pay Now";
+        } else {
+          if (result.paymentIntent.status === "succeeded") {
+            paymentMessage.style.color = "green";
+            paymentMessage.textContent = "Payment successful! Thank you for your order.";
             localStorage.removeItem("edenforge_cart");
             setTimeout(() => {
               window.location.href = "thankyou.html";
             }, 2500);
-          });
-        },
-        onError: function(err) {
-          submitMessage.style.color = "red";
-          submitMessage.textContent = "Payment failed. Please try again.";
-          console.error(err);
+          }
         }
-      }).render("#paypal-button-container");
-    }
-
-    // Submit button handler to validate form & enable PayPal
-    submitBtn.addEventListener("click", () => {
-      submitMessage.textContent = "";
-      if (validateAll()) {
-        submitMessage.style.color = "green";
-        submitMessage.textContent = "Details submitted successfully! You can now complete your payment below.";
-        renderPayPalButton();
-        submitBtn.disabled = true;
-        // Optionally disable inputs here if you want:
-        // [...form.elements].forEach(el => el.disabled = true);
-      } else {
-        submitMessage.style.color = "red";
-        submitMessage.textContent = "Please correct the errors above before submitting.";
+      } catch (err) {
+        paymentMessage.style.color = "red";
+        paymentMessage.textContent = "Payment failed: " + err.message;
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Pay Now";
       }
     });
   </script>
 
 </body>
 </html>
-
-
