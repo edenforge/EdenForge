@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Shop - EdenForge</title>
+  <link rel="stylesheet" href="styles.css">
   <script src="https://js.stripe.com/v3/"></script> <!-- Stripe Library -->
   <style>
     body {
@@ -71,9 +72,63 @@
 <body>
 
   <h1>Welcome to EdenForge Shop</h1>
-  <!-- Add your products and "Add to Cart" buttons here -->
+
 
   <button id="open-cart">🛒 Cart</button>
+  <header>
+    <h1>EdenForge Shop</h1>
+    <p>Plants, Wooden Labels & Outdoor Essentials</p>
+  </header>
+
+  <nav>
+    <a href="index.html">About</a>
+    <a href="services.html">Services</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="contact.html">Contact</a>
+    <a href="shop.html">Shop</a>
+  </nav>
+
+  <div id="cart-button">🛒 Cart (<span id="cart-count">0</span>)</div>
+
+  <div id="cart">
+    <button id="close-cart">✖</button>
+    <h2>Your Cart</h2>
+    <div id="cart-items"></div>
+    <p><strong>Total: £<span id="cart-total">0.00</span></strong></p>
+    <a href="checkout.html" id="checkout-link">
+  <button>Go to Checkout</button> </a>
+  </div>
+    <div class="services">
+    
+      <div class="card">
+        <img src="https://via.placeholder.com/300x180?text=Herb+Garden+Kit" alt="Herb Garden Kit" style="width:100%; border-radius: 8px;">
+        <h3>Herb Garden Starter Kit</h3>
+        <p><strong>£25.00</strong></p>
+        <p>Includes seeds, pots, and instructions.</p>
+        <button onclick="addToCart('Herb Garden Starter Kit', 25.00)">Add to Cart</button>
+      </div>
+
+      <div class="card">
+        <img src="https://via.placeholder.com/300x180?text=Wooden+Plant+Labels" alt="Wooden Plant Labels" style="width:100%; border-radius: 8px;">
+        <h3>Wooden Plant Labels (20-Pack)</h3>
+        <p><strong>£8.00</strong></p>
+        <p>Eco-friendly labels for your garden beds.</p>
+        <button onclick="addToCart('Wooden Plant Labels (20-Pack)', 8.00)">Add to Cart</button>
+      </div>
+
+      <div class="card">
+        <img src="https://via.placeholder.com/300x180?text=Planter+Box" alt="Outdoor Planter Box" style="width:100%; border-radius: 8px;">
+        <h3>Outdoor Planter Box</h3>
+        <p><strong>£80.00</strong></p>
+        <p>Hand-crafted from weather-resistant wood.</p>
+        <button onclick="addToCart('Outdoor Planter Box', 80.00)">Add to Cart</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 EdenForge. All rights reserved.</p>
+  </footer>
 
   <!-- Cart Panel -->
   <div id="cart-panel">
