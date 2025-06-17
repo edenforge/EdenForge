@@ -2,58 +2,124 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Payment - EdenForge</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
   <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=GBP"></script> <!-- Replace YOUR_CLIENT_ID -->
   <style>
     body {
-      font-family: sans-serif; 
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 20px;
     }
     h1 {
-      margin-bottom: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .section {
+      margin-bottom: 30px;
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 14px;
     }
     #cart-summary div {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid #eee;
+    }
+    #cart-summary div:last-child {
+      border-bottom: none;
+      font-weight: 700;
+      font-size: 16px;
     }
     #paypal-button-container {
-      margin-top: 30px;
-    }
-    #empty-note {
-      color: #888;
       margin-top: 20px;
+      text-align: center;
+    }
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-top: -12px;
+      margin-bottom: 12px;
+    }
+    #submit-message {
+      margin-top: 15px;
+      font-weight: 600;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-  <h1>Complete Your Payment</h1>
-  <p>Review your items and proceed with secure payment via PayPal.</p>
+  <h1>EdenForge Payment</h1>
 
-  <div id="cart-summary"></div>
-  <p><strong>Total: £<span id="checkout-total">0.00</span></strong></p>
+  <div class="section" id="cart-section">
+    <h2>Your Order</h2>
+    <div id="cart-summary"></div>
+    <p style="text-align: right; font-weight: 700; font-size: 18px;">Total: £<span id="checkout-total">0.00</span></p>
+  </div>
+
+  <div class="section" id="billing-section">
+    <h2>Billing & Shipping Details</h2>
+    <form id="payment-form" novalidate>
+      <label for="fullName">Full Name *</label>
+      <input type="text" id="fullName" name="fullName" required />
+      <div class="error" id="error-fullName"></div>
+
+      <label for="email">Email Address *</label>
+      <input type="email" id="email" name="email" required />
+      <div class="error" id="error-email"></div>
+
+      <label for="address">Address *</label>
+      <textarea id="address" name="address" rows="3" required></textarea>
+      <div class="error" id="error-address"></div>
+
+      <label for="city">City *</label>
+      <input type="text" id="city" name="city" required />
+      <div class="error" id="error-city"></div>
+
+      <label for="postcode">Postcode *</label>
+      <input type="text" id="postcode" name="postcode" required />
+      <div class="error" id="error-postcode"></div>
+    </form>
+  </div>
 
   <div id="paypal-button-container"></div>
-  <div id="empty-note"></div>
+
+  <div id="submit-message"></div>
 
   <script>
     const cart = JSON.parse(localStorage.getItem("edenforge_cart")) || [];
     const cartSummary = document.getElementById("cart-summary");
     const totalElement = document.getElementById("checkout-total");
-    const note = document.getElementById("empty-note");
+    const submitMessage = document.getElementById("submit-message");
+    const paypalContainer = document.getElementById("paypal-button-container");
+    const form = document.getElementById("payment-form");
 
     let total = 0;
 
+    // Show cart items & total
     if (cart.length === 0) {
-      cartSummary.innerHTML = "";
+      cartSummary.innerHTML = "<p>Your cart is empty.</p>";
       totalElement.textContent = "0.00";
-      document.getElementById("paypal-button-container").style.display = "none";
-      note.textContent = "Your cart is empty.";
+      paypalContainer.style.display = "none";
     } else {
       cart.forEach(item => {
         const div = document.createElement("div");
@@ -62,27 +128,102 @@
         total += item.price * item.quantity;
       });
       totalElement.textContent = total.toFixed(2);
+    }
 
+    // Simple form validation
+    function validateForm() {
+      let valid = true;
+      const fields = ["fullName", "email", "address", "city", "postcode"];
+      fields.forEach(field => {
+        const input = document.getElementById(field);
+        const errorDiv = document.getElementById("error-" + field);
+        if (!input.value.trim()) {
+          errorDiv.textContent = "This field is required.";
+          valid = false;
+        } else {
+          errorDiv.textContent = "";
+          // Additional email validation
+          if (field === "email") {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!re.test(input.value.trim())) {
+              errorDiv.textContent = "Please enter a valid email.";
+              valid = false;
+            }
+          }
+        }
+      });
+      return valid;
+    }
+
+    // Render PayPal button only if cart not empty and form valid
+    function renderPayPalButton() {
+      paypalContainer.innerHTML = "";
       paypal.Buttons({
+        onInit: function(data, actions) {
+          // Disable button initially
+          actions.disable();
+
+          // Enable button only when form is valid
+          form.addEventListener("input", () => {
+            if (validateForm()) {
+              actions.enable();
+            } else {
+              actions.disable();
+            }
+          });
+        },
         createOrder: function(data, actions) {
+          if (!validateForm()) {
+            submitMessage.textContent = "Please fill in all required fields correctly.";
+            return actions.reject();
+          }
+          submitMessage.textContent = "";
+          // Optionally: send form and cart data to backend for order processing here
           return actions.order.create({
             purchase_units: [{
               amount: {
                 value: total.toFixed(2)
+              },
+              shipping: {
+                name: {
+                  full_name: form.fullName.value.trim()
+                },
+                address: {
+                  address_line_1: form.address.value.trim(),
+                  admin_area_2: form.city.value.trim(),
+                  postal_code: form.postcode.value.trim(),
+                  country_code: 'GB'
+                }
               }
             }]
           });
         },
         onApprove: function(data, actions) {
           return actions.order.capture().then(function(details) {
-            alert('Thank you, ' + details.payer.name.given_name + '! Your payment was successful.');
+            // Show success message
+            submitMessage.style.color = "green";
+            submitMessage.textContent = `Thank you, ${details.payer.name.given_name}! Your payment was successful.`;
+
+            // Clear cart and optionally redirect to thank you page
             localStorage.removeItem("edenforge_cart");
-            window.location.href = "thankyou.html"; // Optional thank you page
+
+            setTimeout(() => {
+              window.location.href = "thankyou.html";
+            }, 2500);
           });
+        },
+        onError: function(err) {
+          submitMessage.style.color = "red";
+          submitMessage.textContent = "Payment failed. Please try again.";
+          console.error(err);
         }
-      }).render('#paypal-button-container');
+      }).render("#paypal-button-container");
+    }
+
+    if (cart.length > 0) {
+      renderPayPalButton();
     }
   </script>
-
 </body>
 </html>
+
