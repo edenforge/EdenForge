@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -49,6 +49,16 @@
       border-radius: 5px;
       z-index: 1001;
     }
+    #close-cart {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+    }
   </style>
 </head>
 <body>
@@ -69,6 +79,7 @@
   <div id="cart-button">🛒 Cart (<span id="cart-count">0</span>)</div>
 
   <div id="cart">
+    <button id="close-cart">✖</button>
     <h2>Your Cart</h2>
     <div id="cart-items"></div>
     <p><strong>Total: £<span id="cart-total">0.00</span></strong></p>
@@ -114,11 +125,16 @@
     const cartCount = document.getElementById("cart-count");
     const cartItems = document.getElementById("cart-items");
     const cartTotal = document.getElementById("cart-total");
+    const closeCart = document.getElementById("close-cart");
 
     let cart = JSON.parse(localStorage.getItem("edenforge_cart")) || [];
 
     cartButton.addEventListener("click", () => {
-      cartPanel.classList.toggle("open");
+      cartPanel.classList.add("open");
+    });
+
+    closeCart.addEventListener("click", () => {
+      cartPanel.classList.remove("open");
     });
 
     function saveCart() {
@@ -186,7 +202,7 @@
 
     function checkout() {
       alert("Checkout process would go here.");
-      // In production: send cart to server and create a Stripe Checkout session
+      // Stripe Checkout integration would happen here
     }
 
     // Initialize cart display
