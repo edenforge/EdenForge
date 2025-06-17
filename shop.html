@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>EdenForge Shop</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://js.stripe.com/v3/"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=GBP"></script> <!-- Replace YOUR_CLIENT_ID -->
   <style>
     #cart {
       position: fixed;
@@ -49,19 +49,19 @@
       border-radius: 5px;
       z-index: 1001;
     }
-   #close-cart {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: red;
-  color: white;
-  border: none;
-  font-size: 20px;
-  font-weight: bold;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-}
+    #close-cart {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: red;
+      color: white;
+      border: none;
+      font-size: 20px;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -86,36 +86,34 @@
     <h2>Your Cart</h2>
     <div id="cart-items"></div>
     <p><strong>Total: £<span id="cart-total">0.00</span></strong></p>
-    <a href="checkout.html" id="checkout-link">
-  <button>Go to Checkout</button> </a>
+    <div id="paypal-button-container"></div>
   </div>
-    <div class="services">
-    
-      <div class="card">
-        <img src="https://via.placeholder.com/300x180?text=Herb+Garden+Kit" alt="Herb Garden Kit" style="width:100%; border-radius: 8px;">
-        <h3>Herb Garden Starter Kit</h3>
-        <p><strong>£25.00</strong></p>
-        <p>Includes seeds, pots, and instructions.</p>
-        <button onclick="addToCart('Herb Garden Starter Kit', 25.00)">Add to Cart</button>
-      </div>
 
-      <div class="card">
-        <img src="https://via.placeholder.com/300x180?text=Wooden+Plant+Labels" alt="Wooden Plant Labels" style="width:100%; border-radius: 8px;">
-        <h3>Wooden Plant Labels (20-Pack)</h3>
-        <p><strong>£8.00</strong></p>
-        <p>Eco-friendly labels for your garden beds.</p>
-        <button onclick="addToCart('Wooden Plant Labels (20-Pack)', 8.00)">Add to Cart</button>
-      </div>
-
-      <div class="card">
-        <img src="https://via.placeholder.com/300x180?text=Planter+Box" alt="Outdoor Planter Box" style="width:100%; border-radius: 8px;">
-        <h3>Outdoor Planter Box</h3>
-        <p><strong>£80.00</strong></p>
-        <p>Hand-crafted from weather-resistant wood.</p>
-        <button onclick="addToCart('Outdoor Planter Box', 80.00)">Add to Cart</button>
-      </div>
+  <div class="services">
+    <div class="card">
+      <img src="https://via.placeholder.com/300x180?text=Herb+Garden+Kit" alt="Herb Garden Kit" style="width:100%; border-radius: 8px;">
+      <h3>Herb Garden Starter Kit</h3>
+      <p><strong>£25.00</strong></p>
+      <p>Includes seeds, pots, and instructions.</p>
+      <button onclick="addToCart('Herb Garden Starter Kit', 25.00)">Add to Cart</button>
     </div>
-  </section>
+
+    <div class="card">
+      <img src="https://via.placeholder.com/300x180?text=Wooden+Plant+Labels" alt="Wooden Plant Labels" style="width:100%; border-radius: 8px;">
+      <h3>Wooden Plant Labels (20-Pack)</h3>
+      <p><strong>£8.00</strong></p>
+      <p>Eco-friendly labels for your garden beds.</p>
+      <button onclick="addToCart('Wooden Plant Labels (20-Pack)', 8.00)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+      <img src="https://via.placeholder.com/300x180?text=Planter+Box" alt="Outdoor Planter Box" style="width:100%; border-radius: 8px;">
+      <h3>Outdoor Planter Box</h3>
+      <p><strong>£80.00</strong></p>
+      <p>Hand-crafted from weather-resistant wood.</p>
+      <button onclick="addToCart('Outdoor Planter Box', 80.00)">Add to Cart</button>
+    </div>
+  </div>
 
   <footer>
     <p>&copy; 2025 EdenForge. All rights reserved.</p>
@@ -172,6 +170,33 @@
       updateCartUI();
     }
 
+    function renderPayPalButton() {
+      const container = document.getElementById("paypal-button-container");
+      container.innerHTML = "";
+
+      if (cart.length === 0) return;
+
+      paypal.Buttons({
+        createOrder: function(data, actions) {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)
+              }
+            }]
+          });
+        },
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(function(details) {
+            alert('Thank you, ' + details.payer.name.given_name + '! Your order is complete.');
+            cart = [];
+            saveCart();
+            updateCartUI();
+          });
+        }
+      }).render('#paypal-button-container');
+    }
+
     function updateCartUI() {
       cartItems.innerHTML = "";
       let total = 0;
@@ -200,16 +225,13 @@
 
       cartTotal.textContent = total.toFixed(2);
       cartCount.textContent = count;
+
+      renderPayPalButton();
     }
 
-    function checkout() {
-      alert("Checkout process would go here.");
-      // Stripe Checkout integration would happen here
-    }
-
-    // Initialize cart display
     updateCartUI();
   </script>
 
 </body>
+</html>
 </html>
