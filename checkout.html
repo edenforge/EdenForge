@@ -57,7 +57,7 @@
     const cart = JSON.parse(localStorage.getItem("edenforge_cart")) || [];
     const cartSummary = document.getElementById("cart-summary");
     const totalElement = document.getElementById("checkout-total");
-    const stripe = Stripe("pk_test_YOUR_PUBLIC_KEY"); // Replace with your Stripe public key
+    const stripe = Stripe("pk_live_51Rb4PjA8LgWdQnOiZgkahrtMVKJsIr8RNBt7hThQa2mIkEY8QVdRNXlWQ1KNZfnr4XUQeOnTGlGdvhNFZjiQyzhI0033sv7o2D"); // Replace with your Stripe public key
 
     let total = 0;
 
