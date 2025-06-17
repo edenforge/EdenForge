@@ -27,6 +27,20 @@
       cursor: pointer;
       margin-top: 20px;
     }
+    #go-back-button {
+      background: #ccc;
+      color: #000;
+      padding: 10px 16px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+      margin-right: 10px;
+    }
+    #go-back-button:hover {
+      background: #bbb;
+    }
   </style>
 </head>
 <body>
@@ -34,6 +48,9 @@
   <h1>Checkout</h1>
   <div id="cart-summary"></div>
   <p><strong>Total: £<span id="checkout-total">0.00</span></strong></p>
+
+  <!-- Buttons -->
+  <button id="go-back-button">← Go Back to Shop</button>
   <button id="pay-button">Pay with Stripe</button>
 
   <script>
@@ -64,6 +81,10 @@
         return stripe.redirectToCheckout({ sessionId: data.id });
       })
       .catch(err => console.error("Payment error:", err));
+    });
+
+    document.getElementById("go-back-button").addEventListener("click", () => {
+      window.location.href = "shop.html"; // Change if your shop page is named differently
     });
   </script>
 
