@@ -48,7 +48,7 @@
   </style>
 </head>
 <body>
-<?php>
+<php>
   require 'vendor/autoload.php';
 \Stripe\Stripe::setApiKey('sk_live_YOUR_SECRET_KEY');
 
@@ -75,7 +75,7 @@ $session = \Stripe\Checkout\Session::create([
 ]);
 
 echo json_encode(['id' => $session->id]);
-  </?php>
+  </php>
   
   <h1>Checkout</h1>
   <div id="cart-summary"></div>
