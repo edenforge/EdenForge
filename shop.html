@@ -3,85 +3,216 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Payment - EdenForge</title>
+  <title>EdenForge Shop</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://js.stripe.com/v3/"></script>
   <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=GBP"></script> <!-- Replace YOUR_CLIENT_ID -->
   <style>
-    body {
-      font-family: sans-serif; 
+    #cart {
+      position: fixed;
+      top: 0;
+      right: 0;
+      background: #fff;
+      border-left: 1px solid #ccc;
+      width: 300px;
+      height: 100%;
       padding: 20px;
-      max-width: 600px;
-      margin: auto;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
     }
-    h1 {
-      margin-bottom: 10px;
+    #cart.open {
+      transform: translateX(0);
     }
-    #cart-summary div {
+    #cart h2 {
+      margin-top: 0;
+    }
+    .cart-item {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 8px;
+@@ -49,73 +49,71 @@
+      border-radius: 5px;
+      z-index: 1001;
     }
-    #paypal-button-container {
-      margin-top: 30px;
-    }
-    #empty-note {
-      color: #888;
-      margin-top: 20px;
+   #close-cart {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: red;
+  color: white;
+  border: none;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+    #close-cart {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: red;
+      color: white;
+      border: none;
+      font-size: 20px;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <h1>Complete Your Payment</h1>
-  <p>Review your items and proceed with secure payment via PayPal.</p>
+  <header>
+    <h1>EdenForge Shop</h1>
+    <p>Plants, Wooden Labels & Outdoor Essentials</p>
+  </header>
 
-  <div id="cart-summary"></div>
-  <p><strong>Total: £<span id="checkout-total">0.00</span></strong></p>
+  <nav>
+    <a href="index.html">About</a>
+    <a href="services.html">Services</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="contact.html">Contact</a>
+    <a href="shop.html">Shop</a>
+  </nav>
 
-  <div id="paypal-button-container"></div>
-  <div id="empty-note"></div>
+  <div id="cart-button">🛒 Cart (<span id="cart-count">0</span>)</div>
 
-  <script>
-    const cart = JSON.parse(localStorage.getItem("edenforge_cart")) || [];
-    const cartSummary = document.getElementById("cart-summary");
-    const totalElement = document.getElementById("checkout-total");
-    const note = document.getElementById("empty-note");
+  <div id="cart">
+    <button id="close-cart">✖</button>
+    <h2>Your Cart</h2>
+    <div id="cart-items"></div>
+    <p><strong>Total: £<span id="cart-total">0.00</span></strong></p>
+    <a href="checkout.html" id="checkout-link">
+  <button>Go to Checkout</button> </a>
+    <div id="paypal-button-container"></div>
+  </div>
+    <div class="services">
+    
+      <div class="card">
+        <img src="https://via.placeholder.com/300x180?text=Herb+Garden+Kit" alt="Herb Garden Kit" style="width:100%; border-radius: 8px;">
+        <h3>Herb Garden Starter Kit</h3>
+        <p><strong>£25.00</strong></p>
+        <p>Includes seeds, pots, and instructions.</p>
+        <button onclick="addToCart('Herb Garden Starter Kit', 25.00)">Add to Cart</button>
+      </div>
 
-    let total = 0;
+      <div class="card">
+        <img src="https://via.placeholder.com/300x180?text=Wooden+Plant+Labels" alt="Wooden Plant Labels" style="width:100%; border-radius: 8px;">
+        <h3>Wooden Plant Labels (20-Pack)</h3>
+        <p><strong>£8.00</strong></p>
+        <p>Eco-friendly labels for your garden beds.</p>
+        <button onclick="addToCart('Wooden Plant Labels (20-Pack)', 8.00)">Add to Cart</button>
+      </div>
 
-    if (cart.length === 0) {
-      cartSummary.innerHTML = "";
-      totalElement.textContent = "0.00";
-      document.getElementById("paypal-button-container").style.display = "none";
-      note.textContent = "Your cart is empty.";
-    } else {
-      cart.forEach(item => {
-        const div = document.createElement("div");
-        div.innerHTML = `<span>${item.name} x ${item.quantity}</span><span>£${(item.price * item.quantity).toFixed(2)}</span>`;
-        cartSummary.appendChild(div);
-        total += item.price * item.quantity;
-      });
-      totalElement.textContent = total.toFixed(2);
+      <div class="card">
+        <img src="https://via.placeholder.com/300x180?text=Planter+Box" alt="Outdoor Planter Box" style="width:100%; border-radius: 8px;">
+        <h3>Outdoor Planter Box</h3>
+        <p><strong>£80.00</strong></p>
+        <p>Hand-crafted from weather-resistant wood.</p>
+        <button onclick="addToCart('Outdoor Planter Box', 80.00)">Add to Cart</button>
+      </div>
+
+  <div class="services">
+    <div class="card">
+      <img src="https://via.placeholder.com/300x180?text=Herb+Garden+Kit" alt="Herb Garden Kit" style="width:100%; border-radius: 8px;">
+      <h3>Herb Garden Starter Kit</h3>
+      <p><strong>£25.00</strong></p>
+      <p>Includes seeds, pots, and instructions.</p>
+      <button onclick="addToCart('Herb Garden Starter Kit', 25.00)">Add to Cart</button>
+    </div>
+  </section>
+
+    <div class="card">
+      <img src="https://via.placeholder.com/300x180?text=Wooden+Plant+Labels" alt="Wooden Plant Labels" style="width:100%; border-radius: 8px;">
+      <h3>Wooden Plant Labels (20-Pack)</h3>
+      <p><strong>£8.00</strong></p>
+      <p>Eco-friendly labels for your garden beds.</p>
+      <button onclick="addToCart('Wooden Plant Labels (20-Pack)', 8.00)">Add to Cart</button>
+    </div>
+
+    <div class="card">
+      <img src="https://via.placeholder.com/300x180?text=Planter+Box" alt="Outdoor Planter Box" style="width:100%; border-radius: 8px;">
+      <h3>Outdoor Planter Box</h3>
+      <p><strong>£80.00</strong></p>
+      <p>Hand-crafted from weather-resistant wood.</p>
+      <button onclick="addToCart('Outdoor Planter Box', 80.00)">Add to Cart</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 EdenForge. All rights reserved.</p>
+@@ -172,27 +170,54 @@
+      updateCartUI();
+    }
+
+    function renderPayPalButton() {
+      const container = document.getElementById("paypal-button-container");
+      container.innerHTML = "";
+
+      if (cart.length === 0) return;
 
       paypal.Buttons({
         createOrder: function(data, actions) {
           return actions.order.create({
             purchase_units: [{
               amount: {
-                value: total.toFixed(2)
+                value: cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)
               }
             }]
           });
         },
         onApprove: function(data, actions) {
           return actions.order.capture().then(function(details) {
-            alert('Thank you, ' + details.payer.name.given_name + '! Your payment was successful.');
-            localStorage.removeItem("edenforge_cart");
-            window.location.href = "thankyou.html"; // Optional thank you page
+            alert('Thank you, ' + details.payer.name.given_name + '! Your order is complete.');
+            cart = [];
+            saveCart();
+            updateCartUI();
           });
         }
       }).render('#paypal-button-container');
     }
+
+    function updateCartUI() {
+      cartItems.innerHTML = "";
+      let total = 0;
+      let count = 0;
+
+      cart.forEach(item => {
+        total += item.price * item.quantity;
+        count += item.quantity;
+
+        const el = document.createElement("div");
+        el.className = "cart-item";
+        el.innerHTML = `
+          <div style="flex: 1;">
+            ${item.name}<br>
+            <div class="cart-controls">
+              <button onclick="changeQuantity('${item.name}', -1)">−</button>
+              ${item.quantity}
+              <button onclick="changeQuantity('${item.name}', 1)">+</button>
+              <button onclick="removeItem('${item.name}')" style="margin-left:10px;">❌</button>
+            </div>
+          </div>
+          <div>£${(item.price * item.quantity).toFixed(2)}</div>
+        `;
+        cartItems.appendChild(el);
+@@ -200,16 +225,13 @@
+
+      cartTotal.textContent = total.toFixed(2);
+      cartCount.textContent = count;
+    }
+
+    function checkout() {
+      alert("Checkout process would go here.");
+      // Stripe Checkout integration would happen here
+      renderPayPalButton();
+    }
+
+    // Initialize cart display
+    updateCartUI();
   </script>
 
 </body>
