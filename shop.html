@@ -3,235 +3,87 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EdenForge Shop</title>
+  <title>Payment - EdenForge</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&currency=GBP"></script> <!-- Replace YOUR_CLIENT_ID -->
   <style>
-    #cart {
-      position: fixed;
-      top: 0;
-      right: 0;
-      background: #fff;
-      border-left: 1px solid #ccc;
-      width: 300px;
-      height: 100%;
+    body {
+      font-family: sans-serif; 
       padding: 20px;
-      box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-      z-index: 1000;
+      max-width: 600px;
+      margin: auto;
     }
-    #cart.open {
-      transform: translateX(0);
+    h1 {
+      margin-bottom: 10px;
     }
-    #cart h2 {
-      margin-top: 0;
-    }
-    .cart-item {
+    #cart-summary div {
       display: flex;
       justify-content: space-between;
-      margin: 10px 0;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 5px;
+      margin-bottom: 8px;
     }
-    .cart-controls button {
-      margin: 0 5px;
-      padding: 2px 8px;
+    #paypal-button-container {
+      margin-top: 30px;
     }
-    #cart-button {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #333;
-      color: white;
-      padding: 10px 15px;
-      cursor: pointer;
-      border-radius: 5px;
-      z-index: 1001;
-    }
-    #close-cart {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      background: red;
-      color: white;
-      border: none;
-      font-size: 20px;
-      font-weight: bold;
-      padding: 4px 10px;
-      border-radius: 4px;
-      cursor: pointer;
+    #empty-note {
+      color: #888;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>EdenForge Shop</h1>
-    <p>Plants, Wooden Labels & Outdoor Essentials</p>
-  </header>
+  <h1>Complete Your Payment</h1>
+  <p>Review your items and proceed with secure payment via PayPal.</p>
 
-  <nav>
-    <a href="index.html">About</a>
-    <a href="services.html">Services</a>
-    <a href="portfolio.html">Portfolio</a>
-    <a href="contact.html">Contact</a>
-    <a href="shop.html">Shop</a>
-  </nav>
+  <div id="cart-summary"></div>
+  <p><strong>Total: £<span id="checkout-total">0.00</span></strong></p>
 
-  <div id="cart-button">🛒 Cart (<span id="cart-count">0</span>)</div>
-
-  <div id="cart">
-    <button id="close-cart">✖</button>
-    <h2>Your Cart</h2>
-    <div id="cart-items"></div>
-    <p><strong>Total: £<span id="cart-total">0.00</span></strong></p>
-    <div id="paypal-button-container"></div>
-  </div>
-
-  <div class="services">
-    <div class="card">
-      <img src="https://via.placeholder.com/300x180?text=Herb+Garden+Kit" alt="Herb Garden Kit" style="width:100%; border-radius: 8px;">
-      <h3>Herb Garden Starter Kit</h3>
-      <p><strong>£25.00</strong></p>
-      <p>Includes seeds, pots, and instructions.</p>
-      <button onclick="addToCart('Herb Garden Starter Kit', 25.00)">Add to Cart</button>
-    </div>
-
-    <div class="card">
-      <img src="https://via.placeholder.com/300x180?text=Wooden+Plant+Labels" alt="Wooden Plant Labels" style="width:100%; border-radius: 8px;">
-      <h3>Wooden Plant Labels (20-Pack)</h3>
-      <p><strong>£8.00</strong></p>
-      <p>Eco-friendly labels for your garden beds.</p>
-      <button onclick="addToCart('Wooden Plant Labels (20-Pack)', 8.00)">Add to Cart</button>
-    </div>
-
-    <div class="card">
-      <img src="https://via.placeholder.com/300x180?text=Planter+Box" alt="Outdoor Planter Box" style="width:100%; border-radius: 8px;">
-      <h3>Outdoor Planter Box</h3>
-      <p><strong>£80.00</strong></p>
-      <p>Hand-crafted from weather-resistant wood.</p>
-      <button onclick="addToCart('Outdoor Planter Box', 80.00)">Add to Cart</button>
-    </div>
-  </div>
-
-  <footer>
-    <p>&copy; 2025 EdenForge. All rights reserved.</p>
-  </footer>
+  <div id="paypal-button-container"></div>
+  <div id="empty-note"></div>
 
   <script>
-    const cartButton = document.getElementById("cart-button");
-    const cartPanel = document.getElementById("cart");
-    const cartCount = document.getElementById("cart-count");
-    const cartItems = document.getElementById("cart-items");
-    const cartTotal = document.getElementById("cart-total");
-    const closeCart = document.getElementById("close-cart");
+    const cart = JSON.parse(localStorage.getItem("edenforge_cart")) || [];
+    const cartSummary = document.getElementById("cart-summary");
+    const totalElement = document.getElementById("checkout-total");
+    const note = document.getElementById("empty-note");
 
-    let cart = JSON.parse(localStorage.getItem("edenforge_cart")) || [];
+    let total = 0;
 
-    cartButton.addEventListener("click", () => {
-      cartPanel.classList.add("open");
-    });
-
-    closeCart.addEventListener("click", () => {
-      cartPanel.classList.remove("open");
-    });
-
-    function saveCart() {
-      localStorage.setItem("edenforge_cart", JSON.stringify(cart));
-    }
-
-    function addToCart(name, price) {
-      const item = cart.find(i => i.name === name);
-      if (item) {
-        item.quantity += 1;
-      } else {
-        cart.push({ name, price, quantity: 1 });
-      }
-      saveCart();
-      updateCartUI();
-    }
-
-    function changeQuantity(name, amount) {
-      const item = cart.find(i => i.name === name);
-      if (!item) return;
-
-      item.quantity += amount;
-      if (item.quantity <= 0) {
-        removeItem(name);
-      }
-      saveCart();
-      updateCartUI();
-    }
-
-    function removeItem(name) {
-      cart = cart.filter(i => i.name !== name);
-      saveCart();
-      updateCartUI();
-    }
-
-    function renderPayPalButton() {
-      const container = document.getElementById("paypal-button-container");
-      container.innerHTML = "";
-
-      if (cart.length === 0) return;
+    if (cart.length === 0) {
+      cartSummary.innerHTML = "";
+      totalElement.textContent = "0.00";
+      document.getElementById("paypal-button-container").style.display = "none";
+      note.textContent = "Your cart is empty.";
+    } else {
+      cart.forEach(item => {
+        const div = document.createElement("div");
+        div.innerHTML = `<span>${item.name} x ${item.quantity}</span><span>£${(item.price * item.quantity).toFixed(2)}</span>`;
+        cartSummary.appendChild(div);
+        total += item.price * item.quantity;
+      });
+      totalElement.textContent = total.toFixed(2);
 
       paypal.Buttons({
         createOrder: function(data, actions) {
           return actions.order.create({
             purchase_units: [{
               amount: {
-                value: cart.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)
+                value: total.toFixed(2)
               }
             }]
           });
         },
         onApprove: function(data, actions) {
           return actions.order.capture().then(function(details) {
-            alert('Thank you, ' + details.payer.name.given_name + '! Your order is complete.');
-            cart = [];
-            saveCart();
-            updateCartUI();
+            alert('Thank you, ' + details.payer.name.given_name + '! Your payment was successful.');
+            localStorage.removeItem("edenforge_cart");
+            window.location.href = "thankyou.html"; // Optional thank you page
           });
         }
       }).render('#paypal-button-container');
     }
-
-    function updateCartUI() {
-      cartItems.innerHTML = "";
-      let total = 0;
-      let count = 0;
-
-      cart.forEach(item => {
-        total += item.price * item.quantity;
-        count += item.quantity;
-
-        const el = document.createElement("div");
-        el.className = "cart-item";
-        el.innerHTML = `
-          <div style="flex: 1;">
-            ${item.name}<br>
-            <div class="cart-controls">
-              <button onclick="changeQuantity('${item.name}', -1)">−</button>
-              ${item.quantity}
-              <button onclick="changeQuantity('${item.name}', 1)">+</button>
-              <button onclick="removeItem('${item.name}')" style="margin-left:10px;">❌</button>
-            </div>
-          </div>
-          <div>£${(item.price * item.quantity).toFixed(2)}</div>
-        `;
-        cartItems.appendChild(el);
-      });
-
-      cartTotal.textContent = total.toFixed(2);
-      cartCount.textContent = count;
-
-      renderPayPalButton();
-    }
-
-    updateCartUI();
   </script>
 
 </body>
 </html>
-</html>
+
