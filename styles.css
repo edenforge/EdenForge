@@ -77,3 +77,28 @@ button {
   color: black;
   text-decoration: none;
 }
+#team {
+  background-color: #ffffff;
+  padding: 2rem;
+  max-width: 1000px;
+  margin: auto;
+}
+
+.team-member {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.team-member h3 {
+  margin-top: 0;
+  color: #2f4f2f;
+  font-size: 1.3rem;
+}
+
+.team-member p {
+  margin: 0.5rem 0 0;
+  line-height: 1.6;
+}
