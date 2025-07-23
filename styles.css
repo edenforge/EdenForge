@@ -77,12 +77,4 @@ button {
   color: black;
   text-decoration: none;
 }
-#team {
-  background-color: #ffffff;
-  padding: 2rem;
-  max-width: 1000px;
-  margin: auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
+
